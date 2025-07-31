@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useRecentCalculations, useCalculationData } from "@/hooks/use-calculation";
 import { formatDistanceToNow } from "date-fns";
 import { CalculationInput } from "@shared/schema";
+import { clientStorage } from "@/lib/storage";
 
 interface RecentCalculationsProps {
   onLoadCalculation?: (input: CalculationInput) => void;
@@ -19,15 +20,15 @@ export function RecentCalculations({ onLoadCalculation }: RecentCalculationsProp
     }).format(amount);
   };
 
-  const handleLoadCalculation = async (calculationId: string) => {
+  const handleLoadCalculation = (calculationId: string) => {
     if (!onLoadCalculation) return;
     
     try {
-      const response = await fetch(`/api/calculations/${calculationId}`);
-      if (!response.ok) throw new Error('Failed to load calculation');
-      
-      const data = await response.json();
-      onLoadCalculation(data.data.input);
+      const calculation = clientStorage.getCalculation(calculationId);
+      if (!calculation) {
+        throw new Error('Calculation not found');
+      }
+      onLoadCalculation(calculation.input);
     } catch (error) {
       console.error('Error loading calculation:', error);
     }

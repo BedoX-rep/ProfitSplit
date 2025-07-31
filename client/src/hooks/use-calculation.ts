@@ -1,29 +1,25 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { CalculationInput, CalculationResult } from '@shared/schema';
+import { clientStorage, SavedCalculation } from '@/lib/storage';
 
 // Hook for calculating profit distribution
 export function useCalculateProfit() {
   return useMutation({
     mutationFn: async (input: CalculationInput): Promise<{ id: string; data: CalculationResult }> => {
-      const response = await fetch('/api/calculate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to calculate profit');
+      try {
+        const result = clientStorage.saveCalculation(input);
+        return { 
+          id: result.id, 
+          data: result.result 
+        };
+      } catch (error) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to save calculation');
       }
-
-      return response.json();
     },
     onSuccess: () => {
       // Invalidate recent calculations when new calculation is made
-      queryClient.invalidateQueries({ queryKey: ['/api/calculations'] });
+      queryClient.invalidateQueries({ queryKey: ['calculations'] });
     },
   });
 }
@@ -41,19 +37,19 @@ export function useCalculation() {
 // Hook for fetching a saved calculation
 export function useCalculationData(id: string | null) {
   return useQuery({
-    queryKey: ['/api/calculations', id],
-    queryFn: async (): Promise<{ input: CalculationInput; result: CalculationResult }> => {
+    queryKey: ['calculations', id],
+    queryFn: (): { input: CalculationInput; result: CalculationResult } => {
       if (!id) throw new Error('No calculation ID provided');
       
-      const response = await fetch(`/api/calculations/${id}`);
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch calculation');
+      const calculation = clientStorage.getCalculation(id);
+      if (!calculation) {
+        throw new Error('Calculation not found');
       }
 
-      const result = await response.json();
-      return result.data;
+      return {
+        input: calculation.input,
+        result: calculation.result
+      };
     },
     enabled: !!id,
   });
@@ -62,19 +58,13 @@ export function useCalculationData(id: string | null) {
 // Hook for fetching recent calculations
 export function useRecentCalculations() {
   return useQuery({
-    queryKey: ['/api/calculations'],
-    queryFn: async (): Promise<Array<{ id: string; timestamp: Date; result: CalculationResult }>> => {
-      const response = await fetch('/api/calculations');
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch recent calculations');
-      }
-
-      const result = await response.json();
-      return result.data.map((calc: any) => ({
-        ...calc,
-        timestamp: new Date(calc.timestamp)
+    queryKey: ['calculations'],
+    queryFn: (): Array<{ id: string; timestamp: Date; result: CalculationResult }> => {
+      const calculations = clientStorage.getRecentCalculations();
+      return calculations.map(calc => ({
+        id: calc.id,
+        timestamp: calc.timestamp,
+        result: calc.result
       }));
     },
   });
