@@ -5,24 +5,27 @@ import { useCalculateProfit } from "@/hooks/use-calculation";
 import { useToast } from "@/hooks/use-toast";
 import { CalculatorState } from "@/types/calculator";
 import { Member } from "@shared/schema";
+import { RevenueInput } from "@/components/revenue-input";
 
 export default function Calculator() {
-  const [state, setState] = useState<CalculatorState>({
+  const [state, setState] = useState<CalculatorState>(() => ({
     totalRevenue: 0,
     monthlyExpenses: [
-      { id: 'utilities', name: 'Plant/Utilities', amount: 0 },
-      { id: 'tax', name: 'Tax', amount: 0 },
-      { id: 'mortgage', name: 'Mortgage Costs', amount: 0 }
+      { id: '1', name: 'Plant/Utilities', amount: 0 },
+      { id: '2', name: 'Tax', amount: 0 },
+      { id: '3', name: 'Mortgage', amount: 0 },
+      { id: '4', name: 'Other Monthly', amount: 0 }
     ],
     nonMonthlyExpenses: [
-      { id: 'merchandise', name: 'Merchandise', amount: 0 },
-      { id: 'labor', name: 'Labor Costs', amount: 0 },
-      { id: 'loans', name: 'Loans', amount: 0 }
+      { id: '1', name: 'Merchandise', amount: 0 },
+      { id: '2', name: 'Labor Costs', amount: 0 },
+      { id: '3', name: 'Loans', amount: 0 },
+      { id: '4', name: 'Other Non-Monthly', amount: 0 }
     ],
     framesCost: 0,
     companyPercentage: 0,
     members: []
-  });
+  }));
 
   const { mutate: saveCalculation } = useCalculateProfit();
   const { toast } = useToast();
