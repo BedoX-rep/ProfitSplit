@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Image } from "lucide-react";
+import { Package, Info } from "lucide-react";
 
 interface FramesCostProps {
   value: number;
@@ -10,32 +9,50 @@ interface FramesCostProps {
 
 export function FramesCost({ value, onChange }: FramesCostProps) {
   return (
-    <Card className="border-gray-200">
-      <CardContent className="p-6">
-        <div className="flex items-center mb-4">
-          <div className="bg-green-100 rounded-full p-2 mr-3">
-            <Image className="h-5 w-5 text-green-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900">Step 4: Total Cost of Frames</h2>
+    <div className="card-elevated p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="rounded-xl bg-primary/10 p-3">
+          <Package className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <Label htmlFor="framesCost" className="block text-sm font-medium text-gray-700 mb-2">
-            Frames Cost
+          <h2 className="text-display-sm font-bold text-foreground">Step 4: Frames Cost</h2>
+          <p className="text-body-sm text-muted-foreground">Enter frames cost for refund calculation</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="framesCost" className="text-body-sm font-medium text-foreground mb-2 block">
+            Total Frames Cost
           </Label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">£</span>
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+              <span className="text-muted-foreground font-medium">$</span>
+            </div>
             <Input
               id="framesCost"
+              data-testid="input-frames-cost"
               type="number"
-              placeholder="500.00"
+              placeholder="0.00"
               step="0.01"
               value={value || ''}
               onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-              className="pl-8 pr-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="input-field pl-8 text-lg font-semibold"
             />
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-primary-muted/20 border border-primary/20">
+          <Info className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+          <div className="text-body-sm text-foreground">
+            <p className="font-medium mb-1">About Frames Cost Refund</p>
+            <p className="text-muted-foreground">
+              The company member receives a refund for frames cost in addition to their profit share percentage.
+              This amount is refunded in full to the company.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

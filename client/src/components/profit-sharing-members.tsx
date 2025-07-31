@@ -1,157 +1,226 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Users, Building, User, Plus, Trash2 } from "lucide-react";
-import { validatePercentages } from "@/lib/profit-calculator";
-
-interface Member {
-  id: string;
-  name: string;
-  percentage: number;
-}
+import { Slider } from "@/components/ui/slider";
+import { Users, Plus, X, Building, Percent } from "lucide-react";
+import { Member } from "@shared/schema";
+import { nanoid } from "nanoid";
 
 interface ProfitSharingMembersProps {
-  companyPercentage: number;
   members: Member[];
+  onChange: (members: Member[]) => void;
+  companyPercentage: number;
   onCompanyPercentageChange: (percentage: number) => void;
-  onMemberChange: (id: string, field: keyof Member, value: string | number) => void;
-  onAddMember: () => void;
-  onRemoveMember: (id: string) => void;
 }
 
-export function ProfitSharingMembers({
-  companyPercentage,
-  members,
-  onCompanyPercentageChange,
-  onMemberChange,
-  onAddMember,
-  onRemoveMember
+export function ProfitSharingMembers({ 
+  members, 
+  onChange, 
+  companyPercentage, 
+  onCompanyPercentageChange 
 }: ProfitSharingMembersProps) {
-  const validation = validatePercentages(companyPercentage, members);
+  const [newMemberName, setNewMemberName] = useState("");
+
+  const updateMember = (id: string, field: keyof Member, value: string | number) => {
+    const updated = members.map(member => 
+      member.id === id ? { ...member, [field]: value } : member
+    );
+    onChange(updated);
+  };
+
+  const addMember = () => {
+    if (!newMemberName.trim()) return;
+    
+    const newMember: Member = {
+      id: nanoid(),
+      name: newMemberName.trim(),
+      percentage: 0,
+    };
+    
+    onChange([...members, newMember]);
+    setNewMemberName("");
+  };
+
+  const removeMember = (id: string) => {
+    onChange(members.filter(member => member.id !== id));
+  };
+
+  const totalMemberPercentage = members.reduce((sum, member) => sum + (member.percentage || 0), 0);
+  const totalPercentage = companyPercentage + totalMemberPercentage;
+  const remainingPercentage = Math.max(0, 100 - totalPercentage);
 
   return (
-    <Card className="border-gray-200">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <div className="bg-indigo-100 rounded-full p-2 mr-3">
-              <Users className="h-5 w-5 text-indigo-600" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900">Step 5: Profit Sharing Members</h2>
-          </div>
-          <Button onClick={onAddMember} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Member
-          </Button>
+    <div className="card-elevated p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="rounded-xl bg-success/10 p-3">
+          <Users className="h-6 w-6 text-success" />
         </div>
-        
-        {/* Company Member (Special) */}
-        <div className="border border-green-200 rounded-lg p-4 mb-4 bg-green-50">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center">
-              <Building className="h-4 w-4 text-green-600 mr-2" />
-              <span className="font-medium text-green-900">Company (Special Member)</span>
-              <span className="ml-2 bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs">
-                Gets Tax & Frames Refund
-              </span>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="companyPercentage" className="block text-sm font-medium text-gray-700 mb-1">
-                Profit Share Percentage
-              </Label>
-              <div className="relative">
-                <Input
-                  id="companyPercentage"
-                  type="number"
-                  placeholder="50"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={companyPercentage || ''}
-                  onChange={(e) => onCompanyPercentageChange(parseFloat(e.target.value) || 0)}
-                  className="pr-8 pl-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
-              </div>
-            </div>
-          </div>
+        <div>
+          <h2 className="text-display-sm font-bold text-foreground">Step 5: Profit Sharing</h2>
+          <p className="text-body-sm text-muted-foreground">Set company and member profit percentages</p>
         </div>
+      </div>
 
-        {/* Other Members */}
-        {members.map((member) => (
-          <div key={member.id} className="border border-gray-200 rounded-lg p-4 mb-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center">
-                <User className="h-4 w-4 text-gray-600 mr-2" />
-                <span className="font-medium text-gray-900">{member.name || "New Member"}</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onRemoveMember(member.id)}
-                className="text-red-600 hover:text-red-800 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor={`member-name-${member.id}`} className="block text-sm font-medium text-gray-700 mb-1">
-                  Member Name
-                </Label>
-                <Input
-                  id={`member-name-${member.id}`}
-                  type="text"
-                  placeholder="Enter member name"
-                  value={member.name}
-                  onChange={(e) => onMemberChange(member.id, 'name', e.target.value)}
-                  className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      <div className="space-y-6">
+        {/* Company Percentage */}
+        <div className="p-4 rounded-xl bg-surface/50 border border-border/50">
+          <div className="flex items-center gap-3 mb-4">
+            <Building className="h-5 w-5 text-primary" />
+            <Label className="text-body font-semibold text-foreground">Company Share</Label>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <Slider
+                  data-testid="slider-company-percentage"
+                  value={[companyPercentage]}
+                  onValueChange={([value]) => onCompanyPercentageChange(value)}
+                  max={100}
+                  step={1}
+                  className="w-full"
                 />
               </div>
-              <div>
-                <Label htmlFor={`member-percentage-${member.id}`} className="block text-sm font-medium text-gray-700 mb-1">
-                  Profit Share Percentage
-                </Label>
+              <div className="w-20">
                 <div className="relative">
                   <Input
-                    id={`member-percentage-${member.id}`}
+                    data-testid="input-company-percentage"
                     type="number"
-                    placeholder="25"
+                    value={companyPercentage}
+                    onChange={(e) => onCompanyPercentageChange(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                    className="input-field text-center pr-8"
                     min="0"
                     max="100"
-                    step="0.1"
-                    value={member.percentage || ''}
-                    onChange={(e) => onMemberChange(member.id, 'percentage', parseFloat(e.target.value) || 0)}
-                    className="pr-8 pl-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                  <Percent className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
             </div>
           </div>
-        ))}
+        </div>
 
-        {/* Percentage Validation */}
-        <div className={`border rounded-lg p-3 ${validation.isValid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-          <div className="flex items-center justify-between">
-            <span className={`text-sm font-medium ${validation.isValid ? 'text-green-900' : 'text-red-900'}`}>
-              Total Percentage Allocated:
-            </span>
-            <span className={`text-lg font-semibold ${validation.isValid ? 'text-green-900' : 'text-red-900'}`}>
-              {validation.total.toFixed(1)}%
-            </span>
-          </div>
-          <div className={`mt-2 text-xs ${validation.isValid ? 'text-green-700' : 'text-red-700'}`}>
-            {validation.isValid 
-              ? "✓ Perfect! Total equals 100%" 
-              : `${validation.total < 100 ? 'Total must equal 100%' : 'Total exceeds 100%'}`
-            }
+        {/* Team Members */}
+        <div className="space-y-4">
+          <h3 className="text-body-lg font-semibold text-foreground flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Team Members
+          </h3>
+
+          {members.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p className="text-body-sm">No team members added yet</p>
+              <p className="text-caption">Add team members to distribute profit shares</p>
+            </div>
+          )}
+
+          {members.map((member) => (
+            <div key={member.id} className="flex gap-3 items-end p-4 rounded-xl bg-surface/50 border border-border/50">
+              <div className="flex-1">
+                <Label className="text-caption text-muted-foreground mb-2 block">
+                  Member Name
+                </Label>
+                <Input
+                  data-testid={`input-member-name-${member.id}`}
+                  value={member.name}
+                  onChange={(e) => updateMember(member.id, 'name', e.target.value)}
+                  placeholder="Enter member name"
+                  className="input-field"
+                />
+              </div>
+              <div className="w-24">
+                <Label className="text-caption text-muted-foreground mb-2 block">
+                  Share %
+                </Label>
+                <div className="relative">
+                  <Input
+                    data-testid={`input-member-percentage-${member.id}`}
+                    type="number"
+                    step="0.1"
+                    value={member.percentage || ''}
+                    onChange={(e) => updateMember(member.id, 'percentage', parseFloat(e.target.value) || 0)}
+                    placeholder="0"
+                    className="input-field text-center pr-8"
+                    min="0"
+                    max="100"
+                  />
+                  <Percent className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+              <Button
+                data-testid={`button-remove-member-${member.id}`}
+                variant="ghost"
+                size="sm"
+                onClick={() => removeMember(member.id)}
+                className="btn-ghost h-12 w-12 p-0 text-destructive hover:bg-destructive/10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+
+          <div className="flex gap-3 items-end p-4 rounded-xl bg-success-muted/50 border border-success/20">
+            <div className="flex-1">
+              <Label className="text-caption text-muted-foreground mb-2 block">
+                Add New Member
+              </Label>
+              <Input
+                data-testid="input-new-member-name"
+                value={newMemberName}
+                onChange={(e) => setNewMemberName(e.target.value)}
+                placeholder="Enter member name"
+                onKeyPress={(e) => e.key === 'Enter' && addMember()}
+                className="input-field"
+              />
+            </div>
+            <Button
+              data-testid="button-add-member"
+              onClick={addMember}
+              disabled={!newMemberName.trim()}
+              className="btn-secondary h-12 px-6"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add
+            </Button>
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Percentage Summary */}
+        <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/5 border border-primary/20">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-body-sm text-muted-foreground">Company:</span>
+              <span className="text-body font-semibold text-primary">{companyPercentage}%</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-body-sm text-muted-foreground">Team Members:</span>
+              <span className="text-body font-semibold text-secondary">{totalMemberPercentage.toFixed(1)}%</span>
+            </div>
+            <div className="h-px bg-border my-2"></div>
+            <div className="flex justify-between items-center">
+              <span className="text-body font-semibold text-foreground">Total Allocated:</span>
+              <span className={`text-body-lg font-bold ${totalPercentage === 100 ? 'text-success' : totalPercentage > 100 ? 'text-destructive' : 'text-warning'}`}>
+                {totalPercentage.toFixed(1)}%
+              </span>
+            </div>
+            {remainingPercentage > 0 && (
+              <div className="flex justify-between items-center">
+                <span className="text-caption text-muted-foreground">Remaining:</span>
+                <span className="text-body-sm text-warning">{remainingPercentage.toFixed(1)}%</span>
+              </div>
+            )}
+          </div>
+          
+          {totalPercentage > 100 && (
+            <div className="mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+              <p className="text-caption text-destructive font-medium">
+                Total percentage exceeds 100%. Please adjust the shares.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

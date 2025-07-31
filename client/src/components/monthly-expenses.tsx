@@ -1,106 +1,141 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Receipt } from "lucide-react";
-import { formatCurrency } from "@/lib/profit-calculator";
+import { Button } from "@/components/ui/button";
+import { Receipt, Plus, X } from "lucide-react";
+import { CustomExpense } from "@shared/schema";
+import { nanoid } from "nanoid";
 
 interface MonthlyExpensesProps {
-  utilities: number;
-  tax: number;
-  mortgage: number;
-  otherMonthly: number;
-  onChange: (field: string, value: number) => void;
+  expenses: CustomExpense[];
+  onChange: (expenses: CustomExpense[]) => void;
 }
 
-export function MonthlyExpenses({ utilities, tax, mortgage, otherMonthly, onChange }: MonthlyExpensesProps) {
-  const total = utilities + tax + mortgage + otherMonthly;
+export function MonthlyExpenses({ expenses, onChange }: MonthlyExpensesProps) {
+  const [newExpenseName, setNewExpenseName] = useState("");
+
+  const updateExpense = (id: string, field: keyof CustomExpense, value: string | number) => {
+    const updated = expenses.map(expense => 
+      expense.id === id ? { ...expense, [field]: value } : expense
+    );
+    onChange(updated);
+  };
+
+  const addExpense = () => {
+    if (!newExpenseName.trim()) return;
+    
+    const newExpense: CustomExpense = {
+      id: nanoid(),
+      name: newExpenseName.trim(),
+      amount: 0,
+    };
+    
+    onChange([...expenses, newExpense]);
+    setNewExpenseName("");
+  };
+
+  const removeExpense = (id: string) => {
+    onChange(expenses.filter(expense => expense.id !== id));
+  };
 
   return (
-    <Card className="border-gray-200">
-      <CardContent className="p-6">
-        <div className="flex items-center mb-4">
-          <div className="bg-amber-100 rounded-full p-2 mr-3">
-            <Receipt className="h-5 w-5 text-amber-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900">Step 2: Unpaid Monthly Expenses</h2>
+    <div className="card-elevated p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="rounded-xl bg-secondary/10 p-3">
+          <Receipt className="h-6 w-6 text-secondary" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="utilities" className="block text-sm font-medium text-gray-700 mb-2">
-              Plant/Utilities
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">£</span>
-              <Input
-                id="utilities"
-                type="number"
-                placeholder="200.00"
-                step="0.01"
-                value={utilities || ''}
-                onChange={(e) => onChange('utilities', parseFloat(e.target.value) || 0)}
-                className="pl-8 pr-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="tax" className="block text-sm font-medium text-gray-700 mb-2">
-              Tax
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">£</span>
-              <Input
-                id="tax"
-                type="number"
-                placeholder="150.00"
-                step="0.01"
-                value={tax || ''}
-                onChange={(e) => onChange('tax', parseFloat(e.target.value) || 0)}
-                className="pl-8 pr-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="mortgage" className="block text-sm font-medium text-gray-700 mb-2">
-              Mortgage Costs
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">£</span>
-              <Input
-                id="mortgage"
-                type="number"
-                placeholder="250.00"
-                step="0.01"
-                value={mortgage || ''}
-                onChange={(e) => onChange('mortgage', parseFloat(e.target.value) || 0)}
-                className="pl-8 pr-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="otherMonthly" className="block text-sm font-medium text-gray-700 mb-2">
-              Other Monthly Costs
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">£</span>
-              <Input
-                id="otherMonthly"
-                type="number"
-                placeholder="0.00"
-                step="0.01"
-                value={otherMonthly || ''}
-                onChange={(e) => onChange('otherMonthly', parseFloat(e.target.value) || 0)}
-                className="pl-8 pr-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
+        <div>
+          <h2 className="text-display-sm font-bold text-foreground">Step 2: Monthly Expenses</h2>
+          <p className="text-body-sm text-muted-foreground">Add recurring monthly business expenses</p>
         </div>
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-          <div className="flex justify-between items-center">
-            <span className="font-medium text-gray-700">Total Monthly Expenses:</span>
-            <span className="text-lg font-semibold text-gray-900">{formatCurrency(total)}</span>
+      </div>
+
+      <div className="space-y-4">
+        {expenses.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <Receipt className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <p className="text-body-sm">No monthly expenses added yet</p>
+            <p className="text-caption">Add your first expense below</p>
           </div>
+        )}
+
+        {expenses.map((expense) => (
+          <div key={expense.id} className="flex gap-3 items-end p-4 rounded-xl bg-surface/50 border border-border/50">
+            <div className="flex-1">
+              <Label className="text-caption text-muted-foreground mb-2 block">
+                Expense Name
+              </Label>
+              <Input
+                data-testid={`input-monthly-expense-name-${expense.id}`}
+                value={expense.name}
+                onChange={(e) => updateExpense(expense.id, 'name', e.target.value)}
+                placeholder="e.g., Utilities, Rent"
+                className="input-field"
+              />
+            </div>
+            <div className="w-32">
+              <Label className="text-caption text-muted-foreground mb-2 block">
+                Amount
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  data-testid={`input-monthly-expense-amount-${expense.id}`}
+                  type="number"
+                  step="0.01"
+                  value={expense.amount || ''}
+                  onChange={(e) => updateExpense(expense.id, 'amount', parseFloat(e.target.value) || 0)}
+                  placeholder="0.00"
+                  className="input-field pl-8"
+                />
+              </div>
+            </div>
+            <Button
+              data-testid={`button-remove-monthly-expense-${expense.id}`}
+              variant="ghost"
+              size="sm"
+              onClick={() => removeExpense(expense.id)}
+              className="btn-ghost h-12 w-12 p-0 text-destructive hover:bg-destructive/10"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+
+        <div className="flex gap-3 items-end p-4 rounded-xl bg-primary-muted/50 border border-primary/20">
+          <div className="flex-1">
+            <Label className="text-caption text-muted-foreground mb-2 block">
+              Add New Expense
+            </Label>
+            <Input
+              data-testid="input-new-monthly-expense"
+              value={newExpenseName}
+              onChange={(e) => setNewExpenseName(e.target.value)}
+              placeholder="Enter expense name"
+              onKeyPress={(e) => e.key === 'Enter' && addExpense()}
+              className="input-field"
+            />
+          </div>
+          <Button
+            data-testid="button-add-monthly-expense"
+            onClick={addExpense}
+            disabled={!newExpenseName.trim()}
+            className="btn-primary h-12 px-6"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+
+        {expenses.length > 0 && (
+          <div className="flex justify-between items-center pt-4 border-t border-border">
+            <span className="text-body font-semibold text-foreground">Total Monthly Expenses:</span>
+            <span className="text-body-lg font-bold text-secondary">
+              ${expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0).toLocaleString()}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

@@ -1,27 +1,27 @@
-import { CalculatorState, CalculationResults } from "@/types/calculator";
+import { CalculationInput, CalculationResult } from "@shared/schema";
 
-export function calculateProfit(state: CalculatorState): CalculationResults {
+export function calculateProfit(input: CalculationInput): CalculationResult {
   // Calculate total monthly expenses
-  const totalMonthlyExpenses = state.monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const totalMonthlyExpenses = input.monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   
   // Calculate total non-monthly expenses
-  const totalNonMonthlyExpenses = state.nonMonthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const totalNonMonthlyExpenses = input.nonMonthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   
   // Calculate net profit following the flowchart logic
   // Note: Non-monthly expenses are ADDED back (they were already paid from revenue)
-  const netProfit = state.totalRevenue - totalMonthlyExpenses + totalNonMonthlyExpenses - state.framesCost;
+  const netProfit = input.totalRevenue - totalMonthlyExpenses + totalNonMonthlyExpenses - input.framesCost;
   
   // Calculate company profit share (percentage of net profit)
-  const companyProfitShare = (netProfit * state.companyPercentage) / 100;
+  const companyProfitShare = (netProfit * input.companyPercentage) / 100;
   
   // Company gets tax and frames cost refunded
-  const taxExpense = state.monthlyExpenses.find(e => e.name.toLowerCase().includes('tax'))?.amount || 0;
+  const taxExpense = input.monthlyExpenses.find(e => e.name.toLowerCase().includes('tax'))?.amount || 0;
   const companyTaxRefund = taxExpense;
-  const companyFramesRefund = state.framesCost;
+  const companyFramesRefund = input.framesCost;
   const companyTotalShare = companyProfitShare + companyTaxRefund + companyFramesRefund;
   
   // Calculate member shares
-  const memberShares = state.members.map(member => ({
+  const memberShares = input.members.map(member => ({
     id: member.id,
     name: member.name,
     percentage: member.percentage,
@@ -64,19 +64,19 @@ export function validatePercentages(companyPercentage: number, members: Array<{ 
   };
 }
 
-export function exportToCSV(state: CalculatorState, results: CalculationResults): void {
+export function exportToCSV(input: CalculationInput, results: CalculationResult): void {
   const rows = [
     ['Profit Sharing Calculator Results'],
     [''],
     ['Revenue & Expenses'],
-    ['Total Revenue', formatCurrency(state.totalRevenue)],
+    ['Total Revenue', formatCurrency(input.totalRevenue)],
     ['Monthly Expenses'],
-    ...state.monthlyExpenses.map(expense => [`  ${expense.name}`, formatCurrency(expense.amount)]),
+    ...input.monthlyExpenses.map(expense => [`  ${expense.name}`, formatCurrency(expense.amount)]),
     ['  Total Monthly', formatCurrency(results.totalMonthlyExpenses)],
     ['Non-Monthly Expenses'],
-    ...state.nonMonthlyExpenses.map(expense => [`  ${expense.name}`, formatCurrency(expense.amount)]),
+    ...input.nonMonthlyExpenses.map(expense => [`  ${expense.name}`, formatCurrency(expense.amount)]),
     ['  Total Non-Monthly', formatCurrency(results.totalNonMonthlyExpenses)],
-    ['Frames Cost', formatCurrency(state.framesCost)],
+    ['Frames Cost', formatCurrency(input.framesCost)],
     ['Net Profit', formatCurrency(results.netProfit)],
     [''],
     ['Distribution'],

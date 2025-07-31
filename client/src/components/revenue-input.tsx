@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { PoundSterling } from "lucide-react";
+import { DollarSign, TrendingUp } from "lucide-react";
 
 interface RevenueInputProps {
   value: number;
@@ -10,34 +9,45 @@ interface RevenueInputProps {
 
 export function RevenueInput({ value, onChange }: RevenueInputProps) {
   return (
-    <Card className="border-gray-200">
-      <CardContent className="p-6">
-        <div className="flex items-center mb-4">
-          <div className="bg-blue-100 rounded-full p-2 mr-3">
-            <PoundSterling className="h-5 w-5 text-blue-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900">Step 1: Total Revenue</h2>
+    <div className="card-elevated p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="rounded-xl bg-primary/10 p-3">
+          <DollarSign className="h-6 w-6 text-primary" />
         </div>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="totalRevenue" className="block text-sm font-medium text-gray-700 mb-2">
-              Total Revenue Left from Monthly Operations
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">£</span>
-              <Input
-                id="totalRevenue"
-                type="number"
-                placeholder="6000.00"
-                step="0.01"
-                value={value || ''}
-                onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-                className="pl-8 pr-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+        <div>
+          <h2 className="text-display-sm font-bold text-foreground">Step 1: Total Revenue</h2>
+          <p className="text-body-sm text-muted-foreground">Enter your total business revenue</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="totalRevenue" className="text-body-sm font-medium text-foreground mb-2 block">
+            Total Revenue Left from Monthly Operations
+          </Label>
+          <div className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+              <span className="text-muted-foreground font-medium">$</span>
             </div>
+            <Input
+              id="totalRevenue"
+              data-testid="input-total-revenue"
+              type="number"
+              placeholder="0.00"
+              step="0.01"
+              value={value || ''}
+              onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+              className="input-field pl-8 text-lg font-semibold"
+            />
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <TrendingUp className="h-4 w-4 text-success" />
+            <span className="text-caption text-muted-foreground">
+              Enter the revenue remaining after monthly operations
+            </span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

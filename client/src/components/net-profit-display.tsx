@@ -1,49 +1,95 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Calculator } from "lucide-react";
-import { formatCurrency } from "@/lib/profit-calculator";
-import { CalculationResults } from "@/types/calculator";
+import { CalculationResult } from "@shared/schema";
+import { TrendingUp, DollarSign, Calculator, ArrowUp, ArrowDown } from "lucide-react";
 
 interface NetProfitDisplayProps {
-  totalRevenue: number;
-  framesCost: number;
-  results: CalculationResults;
+  result: CalculationResult;
 }
 
-export function NetProfitDisplay({ totalRevenue, framesCost, results }: NetProfitDisplayProps) {
+export function NetProfitDisplay({ result }: NetProfitDisplayProps) {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  const isProfitable = result.netProfit > 0;
+
   return (
-    <Card className="border-gray-200 sticky top-8">
-      <CardContent className="p-6">
-        <div className="flex items-center mb-4">
-          <div className="bg-emerald-100 rounded-full p-2 mr-3">
-            <Calculator className="h-5 w-5 text-emerald-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900">Net Profit Calculation</h2>
+    <div className="card-elevated p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className={`rounded-xl p-3 ${isProfitable ? 'bg-success/10' : 'bg-warning/10'}`}>
+          <TrendingUp className={`h-6 w-6 ${isProfitable ? 'text-success' : 'text-warning'}`} />
         </div>
-        
-        <div className="space-y-3 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Total Revenue:</span>
-            <span className="font-medium">{formatCurrency(totalRevenue)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Monthly Expenses:</span>
-            <span className="font-medium text-red-600">-{formatCurrency(results.totalMonthlyExpenses)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Non-Monthly Expenses:</span>
-            <span className="font-medium text-red-600">-{formatCurrency(results.totalNonMonthlyExpenses)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Frames Cost:</span>
-            <span className="font-medium text-red-600">-{formatCurrency(framesCost)}</span>
-          </div>
-          <hr className="my-3" />
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-semibold text-gray-900">Net Profit:</span>
-            <span className="text-2xl font-bold text-emerald-600">{formatCurrency(results.netProfit)}</span>
+        <div>
+          <h2 className="text-display-sm font-bold text-foreground">Net Profit</h2>
+          <p className="text-body-sm text-muted-foreground">Calculated business profit</p>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {/* Main Profit Display */}
+        <div className={`p-6 rounded-xl border-2 ${
+          isProfitable 
+            ? 'bg-gradient-to-r from-success/5 to-success/10 border-success/20' 
+            : 'bg-gradient-to-r from-warning/5 to-warning/10 border-warning/20'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className={`rounded-full p-3 ${isProfitable ? 'bg-success/20' : 'bg-warning/20'}`}>
+                <DollarSign className={`h-8 w-8 ${isProfitable ? 'text-success' : 'text-warning'}`} />
+              </div>
+              <div>
+                <h3 className="text-display-lg font-bold text-foreground">
+                  {formatCurrency(result.netProfit)}
+                </h3>
+                <p className={`text-body-sm font-medium ${isProfitable ? 'text-success' : 'text-warning'}`}>
+                  {isProfitable ? 'Profitable' : 'Loss'}
+                  {isProfitable ? <ArrowUp className="inline h-4 w-4 ml-1" /> : <ArrowDown className="inline h-4 w-4 ml-1" />}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Breakdown */}
+        <div className="space-y-3">
+          <h4 className="text-body-lg font-semibold text-foreground flex items-center gap-2">
+            <Calculator className="h-5 w-5" />
+            Calculation Breakdown
+          </h4>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center p-3 rounded-lg bg-surface/30">
+              <span className="text-body text-muted-foreground">Monthly Expenses</span>
+              <span className="text-body font-semibold text-destructive">
+                -{formatCurrency(result.totalMonthlyExpenses)}
+              </span>
+            </div>
+            
+            <div className="flex justify-between items-center p-3 rounded-lg bg-surface/30">
+              <span className="text-body text-muted-foreground">Non-Monthly Expenses</span>
+              <span className="text-body font-semibold text-success">
+                +{formatCurrency(result.totalNonMonthlyExpenses)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Profitability Status */}
+        <div className={`p-4 rounded-lg ${
+          isProfitable 
+            ? 'bg-success/10 border border-success/20' 
+            : 'bg-warning/10 border border-warning/20'
+        }`}>
+          <p className={`text-body-sm font-medium text-center ${isProfitable ? 'text-success' : 'text-warning'}`}>
+            {isProfitable 
+              ? 'Your business is profitable! Ready for distribution.' 
+              : 'Business shows a loss. Consider reviewing expenses.'}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

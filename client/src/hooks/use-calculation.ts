@@ -28,8 +28,18 @@ export function useCalculateProfit() {
   });
 }
 
+// Hook for saving calculations (alias for backwards compatibility)
+export function useCalculation() {
+  const mutation = useCalculateProfit();
+  return {
+    mutateAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    error: mutation.error,
+  };
+}
+
 // Hook for fetching a saved calculation
-export function useCalculation(id: string | null) {
+export function useCalculationData(id: string | null) {
   return useQuery({
     queryKey: ['/api/calculations', id],
     queryFn: async (): Promise<{ input: CalculationInput; result: CalculationResult }> => {
