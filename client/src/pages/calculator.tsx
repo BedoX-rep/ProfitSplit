@@ -7,8 +7,11 @@ import { ProfitSharingMembers } from "@/components/profit-sharing-members";
 import { NetProfitDisplay } from "@/components/net-profit-display";
 import { DistributionSummary } from "@/components/distribution-summary";
 import { ActionButtons } from "@/components/action-buttons";
+import { SaveCalculation } from "@/components/save-calculation";
+import { RecentCalculations } from "@/components/recent-calculations";
 import { calculateProfit } from "@/lib/profit-calculator";
 import { CalculatorState } from "@/types/calculator";
+import { Member } from "@shared/schema";
 
 export default function Calculator() {
   const [state, setState] = useState<CalculatorState>({
@@ -49,7 +52,7 @@ export default function Calculator() {
     setState(prev => ({ ...prev, members: prev.members.filter(m => m.id !== id) }));
   }, []);
 
-  const updateMember = useCallback((id: string, field: 'name' | 'percentage', value: string | number) => {
+  const updateMember = useCallback((id: string, field: keyof Member, value: string | number) => {
     setState(prev => ({
       ...prev,
       members: prev.members.map(member =>
@@ -133,11 +136,18 @@ export default function Calculator() {
 
             <DistributionSummary results={results} />
 
+            <SaveCalculation
+              state={state}
+              disabled={results.netProfit <= 0}
+            />
+
             <ActionButtons
               state={state}
               results={results}
               onReset={resetCalculator}
             />
+
+            <RecentCalculations />
           </div>
         </div>
       </div>

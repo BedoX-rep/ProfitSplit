@@ -2,11 +2,12 @@
 
 ## Overview
 
-This is a React-based profit sharing calculator application designed for business operations. The application allows users to input revenue and expenses, then calculates and distributes profits among company members based on configurable percentages. It features a modern UI built with shadcn/ui components and provides export/print functionality for results.
+This is a React-based profit sharing calculator application designed for business operations, built with a serverless-first architecture. The application follows a specific business flowchart to calculate net profit and distribute it among company members, with special handling for the company member (tax and frames cost refunds). It features a modern UI, real-time calculations, save/load functionality, and export capabilities.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Architecture preference: React frontend with TypeScript/JavaScript serverless functions backend.
 
 ## System Architecture
 
@@ -17,14 +18,15 @@ Preferred communication style: Simple, everyday language.
 - **UI Library**: shadcn/ui components built on Radix UI primitives
 - **Styling**: Tailwind CSS with CSS variables for theming
 - **State Management**: React hooks (useState, useCallback) for local state
-- **Data Fetching**: TanStack Query (React Query) for server state management
+- **Data Fetching**: TanStack Query (React Query) for API state management
+- **API Integration**: Custom hooks for calculation, saving, and loading
 
-### Backend Architecture
-- **Server**: Express.js with TypeScript
-- **Development**: TSX for TypeScript execution in development
-- **Production Build**: esbuild for bundling server code
-- **Middleware**: Custom logging and error handling middleware
-- **Storage Interface**: Abstracted storage layer with in-memory implementation
+### Backend Architecture - Serverless Functions
+- **API Functions**: TypeScript serverless functions compatible with Vercel/Netlify
+- **Development Server**: Express.js for local development
+- **Storage**: In-memory storage with abstracted interface (easily replaceable)
+- **Validation**: Zod schemas for request/response validation
+- **Endpoints**: Calculate profit, save calculations, retrieve history
 
 ### Key Components
 
@@ -32,12 +34,24 @@ Preferred communication style: Simple, everyday language.
 - **Calculator Page**: Main application interface with step-by-step input forms
 - **Input Components**: Modular components for revenue, expenses, frames cost, and member management
 - **Display Components**: Real-time calculation display and distribution summary
-- **Action Components**: Export to CSV, print, and reset functionality
+- **Action Components**: Save, export to CSV, print, and reset functionality
+- **History Components**: Recent calculations list with load/view capabilities
+
+#### API Integration
+- **Custom Hooks**: useCalculateProfit, useCalculation, useRecentCalculations
+- **Error Handling**: Toast notifications for user feedback
+- **Optimistic Updates**: Real-time UI updates with server synchronization
+- **Caching**: TanStack Query for intelligent data caching and invalidation
+
+#### Serverless Functions
+- **POST /api/calculate**: Validate input and save calculation with results
+- **GET /api/calculations**: Retrieve recent calculation history
+- **GET /api/calculations/:id**: Load specific saved calculation
 
 #### Shared Schema
-- **Validation**: Zod schemas for type-safe data validation
-- **Types**: Shared TypeScript interfaces between client and server
-- **Business Logic**: Centralized calculation logic and currency formatting
+- **Validation**: Zod schemas for type-safe data validation across client/server
+- **Types**: Shared TypeScript interfaces for calculation input/output
+- **Business Logic**: Profit calculation following specific flowchart requirements
 
 #### UI System
 - **Design System**: Comprehensive component library with consistent styling
@@ -48,10 +62,17 @@ Preferred communication style: Simple, everyday language.
 ## Data Flow
 
 1. **User Input**: Users enter financial data through form components
-2. **Real-time Calculation**: Changes trigger immediate recalculation of profit distribution
-3. **State Management**: Local React state manages calculator inputs and results
-4. **Display Updates**: UI components reactively update based on calculation results
+2. **Real-time Calculation**: Changes trigger immediate local recalculation for instant feedback
+3. **Save to Server**: Users can save calculations via API for persistence
+4. **History Access**: Recent calculations loaded from server with caching
 5. **Export Operations**: Results can be exported to CSV or printed as summary reports
+
+## Deployment Strategy
+
+### Serverless Deployment
+- **Vercel**: Zero-config deployment with automatic serverless functions
+- **Netlify**: Functions deployment with build optimization
+- **Traditional**: Static hosting with separate API deployment
 
 ## External Dependencies
 
