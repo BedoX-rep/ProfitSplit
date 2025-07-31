@@ -95,29 +95,49 @@ export function DistributionSummary({ result }: DistributionSummaryProps) {
         {/* Company Share */}
         {result.companyShare.total > 0 && (
           <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <Building className="h-5 w-5 text-primary" />
                 <div>
                   <p className="text-body font-semibold text-foreground">Company Share</p>
-                  <p className="text-caption text-muted-foreground">
-                    {result.netProfit > 0 ? ((result.companyShare.profitShare / result.netProfit) * 100).toFixed(1) : 0}% of profit
-                  </p>
-                  {result.companyShare.taxRefund > 0 && (
-                    <p className="text-caption text-success">
-                      +{formatCurrency(result.companyShare.taxRefund)} tax refund
-                    </p>
-                  )}
-                  {result.companyShare.framesRefund > 0 && (
-                    <p className="text-caption text-success">
-                      +{formatCurrency(result.companyShare.framesRefund)} frames refund
-                    </p>
-                  )}
+                  <span className="text-body-lg font-bold text-primary">
+                    {formatCurrency(result.companyShare.total)}
+                  </span>
                 </div>
               </div>
-              <span className="text-body-lg font-bold text-primary">
-                {formatCurrency(result.companyShare.total)}
-              </span>
+            </div>
+            
+            {/* Breakdown of company share */}
+            <div className="space-y-2 pl-8 border-l-2 border-primary/20">
+              {/* Profit Distribution */}
+              <div className="flex justify-between items-center">
+                <span className="text-caption text-muted-foreground">
+                  Profit Distribution ({result.netProfit > 0 ? ((result.companyShare.profitShare / result.netProfit) * 100).toFixed(1) : 0}%)
+                </span>
+                <span className="text-caption font-semibold text-foreground">
+                  {formatCurrency(result.companyShare.profitShare)}
+                </span>
+              </div>
+              
+              {/* Tax Refund */}
+              {result.companyShare.taxRefund > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-caption text-muted-foreground">Tax Refund</span>
+                  <span className="text-caption font-semibold text-success">
+                    +{formatCurrency(result.companyShare.taxRefund)}
+                  </span>
+                </div>
+              )}
+              
+              {/* Frames Refund */}
+              {result.companyShare.framesRefund > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-caption text-muted-foreground">Frames Refund</span>
+                  <span className="text-caption font-semibold text-success">
+                    +{formatCurrency(result.companyShare.framesRefund)}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         )}

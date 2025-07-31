@@ -8,6 +8,7 @@ import { RevenueInput } from "@/components/revenue-input";
 import { MonthlyExpenses } from "@/components/monthly-expenses";
 import { NonMonthlyExpenses } from "@/components/non-monthly-expenses";
 import { FramesCost } from "@/components/frames-cost";
+import { TaxInput } from "@/components/tax-input";
 import { ProfitSharingMembers } from "@/components/profit-sharing-members";
 import { NetProfitDisplay } from "@/components/net-profit-display";
 import { DistributionSummary } from "@/components/distribution-summary";
@@ -22,6 +23,7 @@ export default function Calculator() {
   const [monthlyExpenses, setMonthlyExpenses] = useState<CustomExpense[]>([]);
   const [nonMonthlyExpenses, setNonMonthlyExpenses] = useState<CustomExpense[]>([]);
   const [framesCost, setFramesCost] = useState(0);
+  const [taxAmount, setTaxAmount] = useState(0);
   const [companyPercentage, setCompanyPercentage] = useState(50);
   const [members, setMembers] = useState<Member[]>([]);
 
@@ -31,6 +33,7 @@ export default function Calculator() {
     monthlyExpenses,
     nonMonthlyExpenses,
     framesCost,
+    taxAmount,
     companyPercentage,
     members,
   };
@@ -50,8 +53,20 @@ export default function Calculator() {
     setMonthlyExpenses([]);
     setNonMonthlyExpenses([]);
     setFramesCost(0);
+    setTaxAmount(0);
     setCompanyPercentage(50);
     setMembers([]);
+  }, []);
+
+  // Function to load a saved calculation
+  const handleLoadCalculation = useCallback((input: typeof calculationInput) => {
+    setTotalRevenue(input.totalRevenue);
+    setMonthlyExpenses(input.monthlyExpenses);
+    setNonMonthlyExpenses(input.nonMonthlyExpenses);
+    setFramesCost(input.framesCost);
+    setTaxAmount(input.taxAmount || 0);
+    setCompanyPercentage(input.companyPercentage);
+    setMembers(input.members);
   }, []);
 
   const isCalculationReady = totalRevenue > 0 && members.length > 0;
@@ -182,6 +197,13 @@ export default function Calculator() {
                 />
               </div>
               
+              <div className="animate-slide-up" style={{ animationDelay: '0.35s' }}>
+                <TaxInput
+                  value={taxAmount}
+                  onChange={setTaxAmount}
+                />
+              </div>
+              
               <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
                 <ProfitSharingMembers
                   members={members}
@@ -219,7 +241,7 @@ export default function Calculator() {
             )}
             
             <div className="animate-fade-in" style={{ animationDelay: '0.8s' }}>
-              <RecentCalculations />
+              <RecentCalculations onLoadCalculation={handleLoadCalculation} />
             </div>
           </div>
         </div>

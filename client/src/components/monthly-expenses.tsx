@@ -13,6 +13,7 @@ interface MonthlyExpensesProps {
 
 export function MonthlyExpenses({ expenses, onChange }: MonthlyExpensesProps) {
   const [newExpenseName, setNewExpenseName] = useState("");
+  const [newExpenseAmount, setNewExpenseAmount] = useState("");
 
   const updateExpense = (id: string, field: keyof CustomExpense, value: string | number) => {
     const updated = expenses.map(expense => 
@@ -27,11 +28,12 @@ export function MonthlyExpenses({ expenses, onChange }: MonthlyExpensesProps) {
     const newExpense: CustomExpense = {
       id: nanoid(),
       name: newExpenseName.trim(),
-      amount: 0,
+      amount: parseFloat(newExpenseAmount) || 0,
     };
     
     onChange([...expenses, newExpense]);
     setNewExpenseName("");
+    setNewExpenseAmount("");
   };
 
   const removeExpense = (id: string) => {
@@ -105,7 +107,7 @@ export function MonthlyExpenses({ expenses, onChange }: MonthlyExpensesProps) {
         <div className="flex gap-3 items-end p-4 rounded-xl bg-primary-muted/50 border border-primary/20">
           <div className="flex-1">
             <Label className="text-caption text-muted-foreground mb-2 block">
-              Add New Expense
+              Expense Name
             </Label>
             <Input
               data-testid="input-new-monthly-expense"
@@ -115,6 +117,24 @@ export function MonthlyExpenses({ expenses, onChange }: MonthlyExpensesProps) {
               onKeyPress={(e) => e.key === 'Enter' && addExpense()}
               className="input-field"
             />
+          </div>
+          <div className="w-32">
+            <Label className="text-caption text-muted-foreground mb-2 block">
+              Amount
+            </Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+              <Input
+                data-testid="input-new-monthly-expense-amount"
+                type="number"
+                step="0.01"
+                value={newExpenseAmount}
+                onChange={(e) => setNewExpenseAmount(e.target.value)}
+                placeholder="0.00"
+                onKeyPress={(e) => e.key === 'Enter' && addExpense()}
+                className="input-field pl-8"
+              />
+            </div>
           </div>
           <Button
             data-testid="button-add-monthly-expense"

@@ -9,14 +9,14 @@ export function calculateProfit(input: CalculationInput): CalculationResult {
   
   // Calculate net profit following the flowchart logic
   // Note: Non-monthly expenses are ADDED back (they were already paid from revenue)
-  const netProfit = input.totalRevenue - totalMonthlyExpenses + totalNonMonthlyExpenses - input.framesCost;
+  // Subtract frames cost and tax amount from net profit
+  const netProfit = input.totalRevenue - totalMonthlyExpenses + totalNonMonthlyExpenses - input.framesCost - input.taxAmount;
   
   // Calculate company profit share (percentage of net profit)
   const companyProfitShare = (netProfit * input.companyPercentage) / 100;
   
   // Company gets tax and frames cost refunded
-  const taxExpense = input.monthlyExpenses.find(e => e.name.toLowerCase().includes('tax'))?.amount || 0;
-  const companyTaxRefund = taxExpense;
+  const companyTaxRefund = input.taxAmount;
   const companyFramesRefund = input.framesCost;
   const companyTotalShare = companyProfitShare + companyTaxRefund + companyFramesRefund;
   

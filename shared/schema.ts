@@ -17,6 +17,7 @@ export const calculationInputSchema = z.object({
   monthlyExpenses: z.array(customExpenseSchema),
   nonMonthlyExpenses: z.array(customExpenseSchema),
   framesCost: z.number().min(0),
+  taxAmount: z.number().min(0),
   companyPercentage: z.number().min(0).max(100),
   members: z.array(memberSchema),
 });

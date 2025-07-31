@@ -1,9 +1,14 @@
 import { Clock, Eye, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRecentCalculations } from "@/hooks/use-calculation";
+import { useRecentCalculations, useCalculationData } from "@/hooks/use-calculation";
 import { formatDistanceToNow } from "date-fns";
+import { CalculationInput } from "@shared/schema";
 
-export function RecentCalculations() {
+interface RecentCalculationsProps {
+  onLoadCalculation?: (input: CalculationInput) => void;
+}
+
+export function RecentCalculations({ onLoadCalculation }: RecentCalculationsProps) {
   const { data: calculations, isLoading, error, refetch, isRefetching } = useRecentCalculations();
 
   const formatCurrency = (amount: number) => {
@@ -14,10 +19,18 @@ export function RecentCalculations() {
     }).format(amount);
   };
 
-  const handleLoadCalculation = (calculationId: string) => {
-    // This would typically be handled by the parent component
-    // For now, we'll just log it
-    console.log('Load calculation:', calculationId);
+  const handleLoadCalculation = async (calculationId: string) => {
+    if (!onLoadCalculation) return;
+    
+    try {
+      const response = await fetch(`/api/calculations/${calculationId}`);
+      if (!response.ok) throw new Error('Failed to load calculation');
+      
+      const data = await response.json();
+      onLoadCalculation(data.data.input);
+    } catch (error) {
+      console.error('Error loading calculation:', error);
+    }
   };
 
   return (

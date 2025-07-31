@@ -15,7 +15,7 @@ export function FramesCost({ value, onChange }: FramesCostProps) {
           <Package className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h2 className="text-display-sm font-bold text-foreground">Step 4: Frames Cost</h2>
+          <h2 className="text-display-sm font-bold text-foreground">Step 4a: Frames Cost</h2>
           <p className="text-body-sm text-muted-foreground">Enter frames cost for refund calculation</p>
         </div>
       </div>
