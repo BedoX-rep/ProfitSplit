@@ -17,7 +17,7 @@ const initialState: CalculatorState = {
   members: []
 };
 
-export default function Calculator() {
+export function Calculator() {
   const [state, setState] = useState<CalculatorState>(initialState);
   const { data: results } = useCalculation(state);
 
