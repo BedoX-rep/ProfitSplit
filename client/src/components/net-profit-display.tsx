@@ -14,6 +14,23 @@ export function NetProfitDisplay({ result }: NetProfitDisplayProps) {
     }).format(amount);
   };
 
+  // Safety check for result object
+  if (!result) {
+    return (
+      <div className="card-elevated p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="rounded-xl p-3 bg-muted/30">
+            <TrendingUp className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <div>
+            <h2 className="text-display-sm font-bold text-foreground">Net Profit</h2>
+            <p className="text-body-sm text-muted-foreground">Enter calculation data to see results</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const isProfitable = result.netProfit > 0;
 
   return (
@@ -72,6 +89,20 @@ export function NetProfitDisplay({ result }: NetProfitDisplayProps) {
               <span className="text-body text-muted-foreground">Non-Monthly Expenses</span>
               <span className="text-body font-semibold text-success">
                 +{formatCurrency(result.totalNonMonthlyExpenses)}
+              </span>
+            </div>
+            
+            <div className="flex justify-between items-center p-3 rounded-lg bg-surface/30">
+              <span className="text-body text-muted-foreground">Frames Cost</span>
+              <span className="text-body font-semibold text-destructive">
+                -{formatCurrency(result.companyShare.framesRefund)}
+              </span>
+            </div>
+            
+            <div className="flex justify-between items-center p-3 rounded-lg bg-surface/30">
+              <span className="text-body text-muted-foreground">Tax Amount</span>
+              <span className="text-body font-semibold text-destructive">
+                -{formatCurrency(result.companyShare.taxRefund)}
               </span>
             </div>
           </div>
