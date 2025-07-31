@@ -1,13 +1,13 @@
+export interface CustomExpense {
+  id: string;
+  name: string;
+  amount: number;
+}
+
 export interface CalculatorState {
   totalRevenue: number;
-  utilities: number;
-  tax: number;
-  mortgage: number;
-  otherMonthly: number;
-  merchandise: number;
-  labor: number;
-  loans: number;
-  otherNonMonthly: number;
+  monthlyExpenses: CustomExpense[];
+  nonMonthlyExpenses: CustomExpense[];
   framesCost: number;
   companyPercentage: number;
   members: Array<{

@@ -51,19 +51,21 @@ export default function handler(req: APIRequest, res: APIResponse) {
 
 function calculateProfit(input: CalculationInput): CalculationResult {
   // Calculate total monthly expenses
-  const totalMonthlyExpenses = input.utilities + input.tax + input.mortgage + input.otherMonthly;
+  const totalMonthlyExpenses = input.monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   
   // Calculate total non-monthly expenses
-  const totalNonMonthlyExpenses = input.merchandise + input.labor + input.loans + input.otherNonMonthly;
+  const totalNonMonthlyExpenses = input.nonMonthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   
   // Calculate net profit following the flowchart logic
-  const netProfit = input.totalRevenue - totalMonthlyExpenses - totalNonMonthlyExpenses - input.framesCost;
+  // Note: Non-monthly expenses are ADDED back (they were already paid from revenue)
+  const netProfit = input.totalRevenue - totalMonthlyExpenses + totalNonMonthlyExpenses - input.framesCost;
   
   // Calculate company profit share (percentage of net profit)
   const companyProfitShare = (netProfit * input.companyPercentage) / 100;
   
   // Company gets tax and frames cost refunded
-  const companyTaxRefund = input.tax;
+  const taxExpense = input.monthlyExpenses.find(e => e.name.toLowerCase().includes('tax'))?.amount || 0;
+  const companyTaxRefund = taxExpense;
   const companyFramesRefund = input.framesCost;
   const companyTotalShare = companyProfitShare + companyTaxRefund + companyFramesRefund;
   

@@ -2,19 +2,21 @@ import { CalculatorState, CalculationResults } from "@/types/calculator";
 
 export function calculateProfit(state: CalculatorState): CalculationResults {
   // Calculate total monthly expenses
-  const totalMonthlyExpenses = state.utilities + state.tax + state.mortgage + state.otherMonthly;
+  const totalMonthlyExpenses = state.monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   
   // Calculate total non-monthly expenses
-  const totalNonMonthlyExpenses = state.merchandise + state.labor + state.loans + state.otherNonMonthly;
+  const totalNonMonthlyExpenses = state.nonMonthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   
   // Calculate net profit following the flowchart logic
-  const netProfit = state.totalRevenue - totalMonthlyExpenses - totalNonMonthlyExpenses - state.framesCost;
+  // Note: Non-monthly expenses are ADDED back (they were already paid from revenue)
+  const netProfit = state.totalRevenue - totalMonthlyExpenses + totalNonMonthlyExpenses - state.framesCost;
   
   // Calculate company profit share (percentage of net profit)
   const companyProfitShare = (netProfit * state.companyPercentage) / 100;
   
   // Company gets tax and frames cost refunded
-  const companyTaxRefund = state.tax;
+  const taxExpense = state.monthlyExpenses.find(e => e.name.toLowerCase().includes('tax'))?.amount || 0;
+  const companyTaxRefund = taxExpense;
   const companyFramesRefund = state.framesCost;
   const companyTotalShare = companyProfitShare + companyTaxRefund + companyFramesRefund;
   
@@ -69,16 +71,10 @@ export function exportToCSV(state: CalculatorState, results: CalculationResults)
     ['Revenue & Expenses'],
     ['Total Revenue', formatCurrency(state.totalRevenue)],
     ['Monthly Expenses'],
-    ['  Utilities', formatCurrency(state.utilities)],
-    ['  Tax', formatCurrency(state.tax)],
-    ['  Mortgage', formatCurrency(state.mortgage)],
-    ['  Other Monthly', formatCurrency(state.otherMonthly)],
+    ...state.monthlyExpenses.map(expense => [`  ${expense.name}`, formatCurrency(expense.amount)]),
     ['  Total Monthly', formatCurrency(results.totalMonthlyExpenses)],
     ['Non-Monthly Expenses'],
-    ['  Merchandise', formatCurrency(state.merchandise)],
-    ['  Labor', formatCurrency(state.labor)],
-    ['  Loans', formatCurrency(state.loans)],
-    ['  Other Non-Monthly', formatCurrency(state.otherNonMonthly)],
+    ...state.nonMonthlyExpenses.map(expense => [`  ${expense.name}`, formatCurrency(expense.amount)]),
     ['  Total Non-Monthly', formatCurrency(results.totalNonMonthlyExpenses)],
     ['Frames Cost', formatCurrency(state.framesCost)],
     ['Net Profit', formatCurrency(results.netProfit)],

@@ -17,14 +17,8 @@ export function SaveCalculation({ state, disabled }: SaveCalculationProps) {
     // Convert CalculatorState to CalculationInput format
     const calculationInput = {
       totalRevenue: state.totalRevenue,
-      utilities: state.utilities,
-      tax: state.tax,
-      mortgage: state.mortgage,
-      otherMonthly: state.otherMonthly,
-      merchandise: state.merchandise,
-      labor: state.labor,
-      loans: state.loans,
-      otherNonMonthly: state.otherNonMonthly,
+      monthlyExpenses: state.monthlyExpenses,
+      nonMonthlyExpenses: state.nonMonthlyExpenses,
       framesCost: state.framesCost,
       companyPercentage: state.companyPercentage,
       members: state.members,
